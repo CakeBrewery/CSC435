@@ -41,15 +41,15 @@ Program:        UsingList ClassList
         ;
 
 UsingList:      /* empty */
-        |       Kwd_using IDENT ';' UsingList
+        |       KWD_USING IDENT ';' UsingList
         ;
 
-ClassList:	    ClassList ClassDecl
-		|		ClassDecl
-		;
+ClassList:	ClassList ClassDecl
+	|	ClassDecl
+	;
 
-ClassDecl:		Kwd_class Ident '{'  DeclList  '}'
-        |       Kwd_class Ident ':' Ident '{' DeclList '}'
+ClassDecl:	KWD_CLASS IDENT '{'  DeclList  '}'
+        |       KWD_CLASS IDENT ':' IDENT '{' DeclList '}'
 		;
 
 DeclList:       DeclList ConstDecl
@@ -58,7 +58,7 @@ DeclList:       DeclList ConstDecl
         |       /* empty */
         ;
 
-ConstDecl:      Kwd_public Kwd_const Type IDENT '=' InitVal ';'
+ConstDecl:      KWD_PUBLIC KWD_CONST Type IDENT '=' InitVal ';'
         ;
 
 InitVal:        Number
@@ -69,7 +69,7 @@ FieldDeclList:  FieldDeclList FieldDecl
         |       /* empty */
         ;
 
-FieldDecl:      Kwd_public Type IdentList ';'
+FieldDecl:      KWD_PUBLIC Type IdentList ';'
         |       Type IdentList ';'
         ;
 
@@ -77,15 +77,15 @@ IdentList:      IdentList ',' IDENT
         |       IDENT 
         ;
 
-MethodDecl:     Kwd_public MethodType ReturnValue Ident '(' OptFormals ')' Block
+MethodDecl:     KWD_PUBLIC MethodType ReturnValue IDENT '(' OptFormals ')' Block
         ;
         
-MethodType:	Kwd_static
-	|	Kwd_virtual
-	|	Kwd_override
+MethodType:	KWD_STATIC
+	|	KWD_VIRTUAL
+	|	KWD_OVERRIDE
 	;
 
-ReturnValue:	Kwd_void
+ReturnValue:	KWD_VOID
 	|	Type
 	;
 
@@ -97,28 +97,28 @@ FormalPars:     FormalDecl
         |       FormalPars ',' FormalDecl
         ;
 
-FormalDecl:     Type Ident
+FormalDecl:     Type IDENT
         ;
 
 Type:           TypeName
         |       TypeName '[' ']'
         ;
 
-TypeName:       Ident
-        |       Kwd_int
-        |       Kwd_string
-        |       Kwd_void
+TypeName:       IDENT
+        |       KWD_INT
+        |       KWD_STRING
+        |       KWD_VOID
         ;
 
 Statement:      Designator '=' Expr ';'
-        |       Kwd_if '(' Condition ')' Statement OptElsePart
-        |       Kwd_while '(' Condition ')' Statement
+        |       KWD_IF '(' Condition ')' Statement OptElsePart
+        |       KWD_WHILE '(' Condition ')' Statement
         |       Designator '(' OptActuals ')' ';'
         |       Designator PLUSPLUS ';'
         |       Designator MINUSMINUS ';'
-        |       Kwd_break ';'
-        |       Kwd_return ';'
-        |       Kwd_return Expr ';'
+        |       KWD_BREAK ';'
+        |       KWD_RETURN ';'
+        |       KWD_RETURN Expr ';'
         |       Block
         |       ';'
         ;
@@ -146,7 +146,7 @@ CondFact:	Expr EqOp Expr
 EqFact:		Expr RelOp Expr
 	;		
 
-OptElsePart:    Kwd_else Statement
+OptElsePart:    KWD_ELSE Statement
         |       /* empty */
         ;
 
@@ -185,9 +185,9 @@ Factor:		Designator ActParsOp
 	|	Char
 	|	StringConst
 	|	StringConst '.' IDENT
-	|	Kwd_new IDENT '[' Expr ']'
-	|	Kwd_new IDENT '(' ')'
-	|	Kwd_null
+	|	KWD_NEW IDENT '[' Expr ']'
+	|	KWD_NEW IDENT '(' ')'
+	|	KWD_NULL
 	|	'(' Type ')' Factor
 	|	'(' Expr ')'
 	;
@@ -198,10 +198,10 @@ ActParsOp:	'(' ')'
 	|	/*empty*/
 	;
 
-Designator:     Ident Qualifiers
+Designator:     IDENT Qualifiers
         ;
 
-Qualifiers:     '.' Ident Qualifiers
+Qualifiers:     '.' IDENT Qualifiers
         |       '[' Expr ']' Qualifiers
         |       /* empty */
         ;
@@ -219,6 +219,125 @@ RelOp:		'>'
 IDENT:
     Ident {if(flg_token) {
                 push_id();writeln("Token.Ident, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_BREAK:
+    Kwd_break {if(flg_token) {
+                push_id();writeln("Token.Kwd_break, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_CLASS:
+    Kwd_class {if(flg_token) {
+                push_id();writeln("Token.Kwd_class, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_CONST:
+    Kwd_const {if(flg_token) {
+                push_id();writeln("Token.Kwd_const, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_ELSE:
+    Kwd_else {if(flg_token) {
+                push_id();writeln("Token.Kwd_else, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_IF:
+    Kwd_if {if(flg_token) {
+                push_id();writeln("Token.Kwd_if, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_NULL:
+    Kwd_null {if(flg_token) {
+                push_id();writeln("Token.Kwd_null, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_NEW:
+    Kwd_new {if(flg_token) {
+                push_id();writeln("Token.Kwd_new, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_RETURN:
+    Kwd_return {if(flg_token) {
+                push_id();writeln("Token.Kwd_return, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_WHILE:
+    Kwd_while {if(flg_token) {
+                push_id();writeln("Token.Kwd_while, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_STRING:
+    Kwd_string {if(flg_token) {
+                push_id();writeln("Token.Kwd_string, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_INT:
+    Kwd_int {if(flg_token) {
+                push_id();writeln("Token.Kwd_int, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_VOID:
+    Kwd_void {if(flg_token) {
+                push_id();writeln("Token.Kwd_void, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_OVERRIDE:
+    Kwd_override {if(flg_token) {
+                push_id();writeln("Token.Kwd_override, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_VIRTUAL:
+    Kwd_virtual {if(flg_token) {
+                push_id();writeln("Token.Kwd_virtual, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_STATIC:
+    Kwd_static {if(flg_token) {
+                push_id();writeln("Token.Kwd_static, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_PUBLIC:
+    Kwd_public {if(flg_token) {
+                push_id();writeln("Token.Kwd_public, text = ", pop_id());
+           };
+          } 
+    ;
+    
+KWD_USING:
+    Kwd_using {if(flg_token) {
+                push_id();writeln("Token.Kwd_using, text = ", pop_id());
            };
           } 
     ;
