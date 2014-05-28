@@ -13,11 +13,11 @@ public class test
 	  for(int i = 1; i < args.Length; i++){
 	  	if(args[i] == "-tokens"){
 	  		parser.flg_token = true;
-	  		System.Console.WriteLine("Debug: ON");
+	  		System.Console.WriteLine("tokens: ON");
 	  	}
 	  	if(args[i] == "-debug"){
 	  		parser.flg_debug = true; 
-	  		System.Console.WriteLine("Tokens: ON");
+	  		System.Console.WriteLine("debug: ON");
 	  	}
 	  }
 
