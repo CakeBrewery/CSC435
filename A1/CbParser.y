@@ -111,11 +111,11 @@ TypeName:       Ident
         ;
 
 Statement:      Designator '=' Expr ';'
+        |       Kwd_if '(' Condition ')' Statement OptElsePart
+        |       Kwd_while '(' Condition ')' Statement
         |       Designator '(' OptActuals ')' ';'
         |       Designator PLUSPLUS ';'
         |       Designator MINUSMINUS ';'
-        |       Kwd_if '(' Expr ')' Statement OptElsePart
-        |       Kwd_while '(' Expr ')' Statement
         |       Kwd_break ';'
         |       Kwd_return ';'
         |       Kwd_return Expr ';'
@@ -130,6 +130,21 @@ OptActuals:     /* empty */
 ActPars:        ActPars ',' Expr
         |       Expr
         ;
+        
+Condition:	CondTerm OROR CondTerm
+	|	CondTerm
+	;
+	
+CondTerm:	CondFact ANDAND CondFact
+	|	CondFact
+	;
+
+CondFact:	Expr EqOp Expr
+	|	Expr RelOp Expr
+	;
+	
+EqFact:		Expr RelOp Expr
+	;		
 
 OptElsePart:    Kwd_else Statement
         |       /* empty */
@@ -146,31 +161,42 @@ DeclsAndStmts:   /* empty */
         |       DeclsAndStmts LocalDecl
         ;
 
-Expr:           Expr OROR Expr
-        |       Expr ANDAND Expr
-        |       Expr EQEQ Expr
-        |       Expr NOTEQ Expr
-        |       Expr LTEQ Expr
-        |       Expr '<' Expr
-        |       Expr GTEQ Expr
-        |       Expr '>' Expr
-        |       Expr '+' Expr
-        |       Expr '-' Expr
-        |       Expr '*' Expr
-        |       Expr '/' Expr
-        |       Expr '%' Expr
-        |       '-' Expr %prec UMINUS
-        |       Designator
-        |       Designator '(' OptActuals ')'
-        |       Number
-        |       Char
-        |       StringConst
-        |       StringConst '.' Ident // Ident must be "Length"
-        |       Kwd_new Ident '(' ')'
-        |       Kwd_new Ident '[' Expr ']'
-        |       '(' Expr ')'
-        |       Kwd_null
-        ;
+Expr:           Addop Term Expr
+	|	Addop Term
+	|	Term
+	|	Term Expr
+	;
+
+Addop:		'+'
+	|	'-'
+	;
+	
+Term:		Factor	Mulop Factor
+	|	Factor
+	;
+	
+Mulop:		'*'
+	|	'/'
+	|	'%'
+	;
+	
+Factor:		Designator ActParsOp
+	|	Number
+	|	Char
+	|	StringConst
+	|	StringConst '.' IDENT
+	|	Kwd_new IDENT '[' Expr ']'
+	|	Kwd_new IDENT '(' ')'
+	|	Kwd_null
+	|	'(' Type ')' Factor
+	|	'(' Expr ')'
+	;
+
+
+ActParsOp:	'(' ')'
+	|	'(' ActPars ')'
+	|	/*empty*/
+	;
 
 Designator:     Ident Qualifiers
         ;
@@ -179,6 +205,16 @@ Qualifiers:     '.' Ident Qualifiers
         |       '[' Expr ']' Qualifiers
         |       /* empty */
         ;
+        
+EqOp:		EQEQ
+	|	NOTEQ
+	;
+	
+RelOp:		'>'
+	|	'<'
+	|	LTEQ
+	|	GTEQ
+	;
 
 IDENT:
     Ident {if(flg_token) {
