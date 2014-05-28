@@ -177,7 +177,10 @@ Qualifiers:     '.' Ident Qualifiers
         ;
 
 IDENT:
-    Ident {push_id();writeln("Token.Ident, text = ", pop_id());} 
+    Ident {if(flg_token) {
+                push_id();writeln("Token.Ident, text = ", pop_id());
+           };
+          } 
     ;
 
 %%
