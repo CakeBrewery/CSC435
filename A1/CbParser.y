@@ -54,11 +54,11 @@ ClassDecl:		Kwd_class Ident '{'  DeclList  '}'
 
 DeclList:       DeclList ConstDecl
         |       DeclList MethodDecl
+        |	DeclList FieldDecl
         |       /* empty */
         ;
 
 ConstDecl:      Kwd_public Kwd_const Type IDENT '=' InitVal ';'
-        |       Kwd_public Type IDENT ';'
         ;
 
 InitVal:        Number
@@ -77,11 +77,17 @@ IdentList:      IdentList ',' IDENT
         |       IDENT 
         ;
 
-MethodDecl:     Kwd_public Kwd_static Type Ident '(' OptFormals ')' Block
-        |       Kwd_public Kwd_virtual Type Ident '(' OptFormals ')' Block
-        |       Kwd_public Kwd_override Type Ident '(' OptFormals ')' Block
-        |       Ident '.' MethodDecl
+MethodDecl:     Kwd_public MethodType ReturnValue Ident '(' OptFormals ')' Block
         ;
+        
+MethodType:	Kwd_static
+	|	Kwd_virtual
+	|	Kwd_override
+	;
+
+ReturnValue:	Kwd_void
+	|	Type
+	;
 
 OptFormals:     /* empty */
         |       FormalPars
@@ -132,9 +138,7 @@ OptElsePart:    Kwd_else Statement
 Block:          '{' DeclsAndStmts '}'
         ;
 
-LocalDecl:      Ident IdentList ';'
-        |       Type IdentList
-        |       Ident '[' ']' IdentList ';'
+LocalDecl:      Type IdentList
         ;
 
 DeclsAndStmts:   /* empty */
