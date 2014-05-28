@@ -37,7 +37,7 @@
    *                                                                       *
    ************************************************************************* */
 
-Program:        UsingList ClassList
+Program:        UsingList ClassList //Correct
         ;
 
 UsingList:      /* empty */
@@ -48,7 +48,7 @@ ClassList:	ClassList ClassDecl
 	|	ClassDecl
 	;
 
-ClassDecl:	KWD_CLASS IDENT '{'  DeclList  '}'
+ClassDecl:	KWD_CLASS IDENT '{'  DeclList  '}' //Correct
         |       KWD_CLASS IDENT ':' IDENT '{' DeclList '}'
 		;
 
@@ -58,7 +58,7 @@ DeclList:       DeclList ConstDecl
         |       /* empty */
         ;
 
-ConstDecl:      KWD_PUBLIC KWD_CONST Type IDENT '=' InitVal ';'
+ConstDecl:      KWD_PUBLIC KWD_CONST Type IDENT '=' InitVal ';' //correct
         ;
 
 InitVal:        Number
@@ -69,15 +69,14 @@ FieldDeclList:  FieldDeclList FieldDecl
         |       /* empty */
         ;
 
-FieldDecl:      KWD_PUBLIC Type IdentList ';'
-        |       Type IdentList ';'
+FieldDecl:      KWD_PUBLIC Type IdentList ';' //correct
         ;
 
 IdentList:      IdentList ',' IDENT 
         |       IDENT 
         ;
 
-MethodDecl:     KWD_PUBLIC MethodType ReturnValue IDENT '(' OptFormals ')' Block
+MethodDecl:     KWD_PUBLIC MethodType ReturnValue IDENT '(' OptFormals ')' Block //correct
         ;
         
 MethodType:	KWD_STATIC
@@ -93,14 +92,14 @@ OptFormals:     /* empty */
         |       FormalPars
         ;
 
-FormalPars:     FormalDecl
+FormalPars:     FormalDecl //correct
         |       FormalPars ',' FormalDecl
         ;
 
-FormalDecl:     Type IDENT
+FormalDecl:     Type IDENT //correct
         ;
 
-Type:           TypeName
+Type:           TypeName //correct
         |       TypeName '[' ']'
         ;
 
@@ -110,7 +109,7 @@ TypeName:       IDENT
         |       KWD_VOID
         ;
 
-Statement:      Designator '=' Expr ';'
+Statement:      Designator '=' Expr ';' //correct
         |       KWD_IF '(' Condition ')' Statement OptElsePart
         |       KWD_WHILE '(' Condition ')' Statement
         |       Designator '(' OptActuals ')' ';'
@@ -127,7 +126,7 @@ OptActuals:     /* empty */
         |       ActPars
         ;
 
-ActPars:        ActPars ',' Expr
+ActPars:        ActPars ',' Expr //correct
         |       Expr
         ;
         
@@ -150,7 +149,7 @@ OptElsePart:    KWD_ELSE Statement
         |       /* empty */
         ;
 
-Block:          '{' DeclsAndStmts '}'
+Block:          '{' DeclsAndStmts '}' //correct
         ;
 
 LocalDecl:      Type IdentList
