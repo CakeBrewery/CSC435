@@ -63,7 +63,7 @@ null {last_token_text=yytext; return (int)Tokens.Kwd_null;}
 
 
 (')([a-zA-Z0-9 ])(') {last_token_text=yytext;return (int)Tokens.Char;}
-(\")([a-zA-Z0-9 /\n\=\+\-\.\\]*)(\") {last_token_text=yytext;return (int)Tokens.StringConst;}
+\"([^\\\"]|\\.)*\"  {last_token_text=yytext;return (int)Tokens.StringConst;}
 0|[1-9][0-9]*         {last_token_text=yytext;return (int)Tokens.Number;}
 [a-zA-Z][0-9a-zA-Z]*  {last_token_text=yytext;return (int)Tokens.Ident;}
 {opchar}              {return (int)(yytext[0]);}
