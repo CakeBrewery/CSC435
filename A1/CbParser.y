@@ -354,6 +354,7 @@ KWD_USING:
 public Boolean flg_debug; 
 public Boolean flg_token; 
 
+public StreamWriter file; 
 
 Boolean hasMain = false; 
 
@@ -379,12 +380,16 @@ public void writeln(string opcode) {
 }
 
 public void writeln(string opcode, string value) {
+
   if (opcode != null) {
+    file.Write(opcode); 
     System.Console.Write(opcode);
     if (value != null) {
+      file.Write(' '+value); 
       System.Console.Write(' '+value);
     }
   }
+  file.WriteLine();
   System.Console.Write('\n');
 }
 
