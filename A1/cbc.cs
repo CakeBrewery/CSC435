@@ -10,8 +10,12 @@ public class test
 	  parser.flg_token = false;
 	  parser.flg_debug = false;
 
+
+
 	  for(int i = 1; i < args.Length; i++){
 	  	if(args[i] == "-tokens"){
+	  		parser.file = new System.IO.StreamWriter("tokens.txt"); 
+	  		parser.file.AutoFlush = true; 
 	  		parser.flg_token = true;
 	  		System.Console.WriteLine("tokens: ON");
 	  	}
