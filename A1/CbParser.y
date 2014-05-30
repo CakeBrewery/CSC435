@@ -24,7 +24,7 @@
 %token      Kwd_break Kwd_class Kwd_const Kwd_else Kwd_if Kwd_int
 %token      Kwd_new Kwd_out Kwd_public Kwd_return Kwd_static Kwd_string
 %token      Kwd_using Kwd_void Kwd_while
-%token      PLUSPLUS MINUSMINUS Ident Number StringConst
+%token      PLUSPLUS MINUSMINUS Ident Number StringConst Comment
 
 //Added tokens
 %token      Kwd_null Kwd_virtual Kwd_override Char
@@ -63,6 +63,7 @@ ConstDecl:      KWD_PUBLIC KWD_CONST Type IDENT '=' InitVal ';' //correct
 
 InitVal:        Number
         |       StringConst
+        |	Char
         ;
 
 FieldDeclList:  FieldDeclList FieldDecl
@@ -215,6 +216,7 @@ RelOp:		'>'
 	|	GTEQ
 	;
 
+
 IDENT:
     Ident {if(flg_token) {
                 push_id();writeln("Token.Ident, text = ", pop_id());
@@ -340,6 +342,7 @@ KWD_USING:
            };
           } 
     ;
+
 
 %%
 
