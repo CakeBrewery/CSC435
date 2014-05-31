@@ -14,7 +14,23 @@
     Console.WriteLine("{0}: {1}", msg, args);
   }
 
-  public int LineNumber { get{return yyline;} }    
+  public int LineNumber { get{return yyline;} }   
+  
+  int commentLevels = 0;
+  
+  public void startComment(){
+  	  commentLevels++;
+  }
+  
+  public void endComment(){
+  	  commentLevels--;
+  }
+  
+  public void checkCommentLevels(){
+  	  if(commentLevels!=0){
+  	  	  yyerror("Improper comment nesting.");
+  	  }
+  }
 %}
 
 nl [\n]
@@ -27,11 +43,16 @@ symbol [\;\:\.\<\[\]\'\'\"]
 
 %%
 ([/][*])([^/]|[\n])*([*][/]) {
-    line_count += yytext.Split('\n').Length;
+    line_count += yytext.Split('\n').Length; //Non-nested comment
 }
-([/][*])(?>(([/][*])(?<Depth>))|(([*][/])(?<-Depth>))|((.|[\n])?))*([*][/]) {}
 
-([/][/].*[\n]) {}
+([/][*])[^(\*/)]* {line_count += yytext.Split('\n').Length; startComment();} //Start of nested comment
+
+[^(\*/)]*([\*][/]) {line_count += yytext.Split('\n').Length; endComment();} //End of nested comment
+
+<<EOF>> {checkCommentLevels();}
+
+([/][/].*[\n]) {} //Single line comment
 
 {nl}                    {line_count++;}
 {space}                 {}
