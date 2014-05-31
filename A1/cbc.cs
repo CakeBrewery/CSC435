@@ -34,5 +34,7 @@ public class test
 
 	  parser.Parse();
 
+	  System.Console.WriteLine(parser.getLineCount() + " lines parsed"); 
+
 	}
 }

@@ -17,7 +17,8 @@
   public int LineNumber { get{return yyline;} }    
 %}
 
-space [ \r\n\t]
+nl [\n]
+space [ \r\t]
 opchar [+\-*/\=\!\>] // must escape - as it signifies a range
 parenthesis [\{\}\(\)]
 symbol [\;\:\.\<\[\]\'\'\"]
@@ -25,11 +26,14 @@ symbol [\;\:\.\<\[\]\'\'\"]
 
 
 %%
-([/][*])([^/]|[\n])*([*][/]) {}
+([/][*])([^/]|[\n])*([*][/]) {
+    line_count += yytext.Split('\n').Length;
+}
 ([/][*])(?>(([/][*])(?<Depth>))|(([*][/])(?<-Depth>))|((.|[\n])?))*([*][/]) {}
 
 ([/][/].*[\n]) {}
 
+{nl}                    {line_count++;}
 {space}                 {}
 {symbol}                {return (int)(yytext[0]);}
 {parenthesis}           {return (int)(yytext[0]);}
@@ -80,4 +84,5 @@ null {last_token_text=yytext; return (int)Tokens.Kwd_null;}
 %%
 
 public string last_token_text = "";
+public int line_count = 0; 
 

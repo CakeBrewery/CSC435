@@ -1,0 +1,12 @@
+using System;
+ 
+class Test{
+        static void Main(String[] args){
+ 
+                int x = 2;
+                //qwerty
+                if(x==2){
+                        int y = 3;
+                }
+        }
+}

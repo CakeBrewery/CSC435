@@ -393,6 +393,9 @@ public void writeln(string opcode, string value) {
   System.Console.Write('\n');
 }
 
+public int getLineCount(){
+  return ((LexScanner.Scanner)Scanner).line_count;
+}
 public void openFile(FileStream file){
    this.Scanner = new LexScanner.Scanner(file);
 }
