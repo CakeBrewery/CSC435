@@ -155,6 +155,7 @@ Block:          '{' DeclsAndStmts '}' //correct
         ;
 
 LocalDecl:      Type IdentList
+        |       Type IdentList '=' Factor 
         ;
 
 DeclsAndStmts:   /* empty */
@@ -186,8 +187,10 @@ Factor:		Designator ActParsOp
 	|	Char
 	|	StringConst
 	|	StringConst '.' IDENT
+  | KWD_NEW TypeName '[' Expr ']'
 	|	KWD_NEW IDENT '[' Expr ']'
-	|	KWD_NEW IDENT '(' ')'
+  | KWD_NEW IDENT '(' ')'
+  | KWD_NEW IDENT '(' IdentList ')'
 	|	KWD_NULL
 	|	'(' Type ')' Factor
 	|	'(' Expr ')'
