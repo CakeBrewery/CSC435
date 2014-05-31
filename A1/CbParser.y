@@ -78,6 +78,7 @@ IdentList:      IdentList ',' IDENT
         ;
 
 MethodDecl:     KWD_PUBLIC MethodType ReturnValue IDENT '(' OptFormals ')' Block //correct
+        |       MethodType ReturnValue IDENT '(' OptFormals ')' Block 
         ;
         
 MethodType:	KWD_STATIC
