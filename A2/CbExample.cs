@@ -5,6 +5,7 @@ using adsfadsfdsafdas;
 using asdfasdf;
 
 class List {
+    public const int x = 3; 
     public List next;
     public virtual void Print() {}
 }
@@ -25,6 +26,7 @@ class Digit: List {
         Console.Write(d);
         if (next != null) next.Print();
     }
+    public override void Add(int i) {}
 }
 
 class Lists {
