@@ -35,9 +35,9 @@
 
 nl [\n]
 space [ \r\t]
-opchar [+\-*/\=\!\>] // must escape - as it signifies a range
+opchar [\+\-*/\=\!\>] // must escape - as it signifies a range
 parenthesis [\{\}\(\)]
-symbol [\;\:\.\<\[\]\'\'\"]
+symbol [\;\:\.\<\[\]\'\'\"\,]
 
 
 
@@ -60,10 +60,12 @@ symbol [\;\:\.\<\[\]\'\'\"]
 {parenthesis}           {return (int)(yytext[0]);}
 
 (!=)               {last_token_text=yytext;return (int)Tokens.NOTEQ;}
-(++)               {last_token_text=yytext;return (int)Tokens.PLUSPLUS;}
+([+][+])               {last_token_text=yytext;return (int)Tokens.PLUSPLUS;}
+(\-\-)               {last_token_text=yytext;return (int)Tokens.MINUSMINUS;}
 (==)               {last_token_text=yytext;return (int)Tokens.EQEQ;}
 (>=)               {last_token_text=yytext;return (int)Tokens.LTEQ;}
 (<=)               {last_token_text=yytext;return (int)Tokens.GTEQ;}
+(\|\|)               {last_token_text=yytext;return (int)Tokens.OROR;}
 (&&)               {last_token_text=yytext;return (int)Tokens.ANDAND;}
 
 
@@ -90,7 +92,7 @@ while {last_token_text=yytext; return (int)Tokens.Kwd_while;}
 null {last_token_text=yytext; return (int)Tokens.Kwd_null;}
 
 
-(')([a-zA-Z0-9 ])(') {last_token_text=yytext;return (int)Tokens.Char;}
+(')([a-zA-Z0-9 ]|(\\n)?|(\\r)?|(\\t)?|(\\\')?|(\\\")?)(') {last_token_text=yytext;return (int)Tokens.Char;}
 \"([^\\\"]|\\.)*\"  {last_token_text=yytext;return (int)Tokens.StringConst;}
 0|[1-9][0-9]*         {last_token_text=yytext;return (int)Tokens.Number;}
 [a-zA-Z][0-9a-zA-Z]*  {last_token_text=yytext;return (int)Tokens.Ident;}

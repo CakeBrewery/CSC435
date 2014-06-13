@@ -2,12 +2,11 @@ using System;
 
 class JTest {
 	public static void Main() {
-		DivideTester dt;
 		int i;
 		i = 1;
 		while(1 == 1){
 			Console.WriteLine("Enter Integer: ");
-			i = Console.ReadInt();
+			i = (int)Console.ReadLine();
 			if(i==0){
 				break;
 			}
