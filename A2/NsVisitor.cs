@@ -10,6 +10,8 @@ public class NsVisitor: Visitor {
     public const int USINGLIST = 0; 
     public const int CLASSLIST = 1; 
     public const int MEMBERLIST = 2; 
+    
+    //public static NameSpace TopLevelNames = new NameSpace("");
 
     public NsVisitor() {
 
@@ -42,11 +44,12 @@ public class NsVisitor: Visitor {
 
             case USINGLIST:
                 if(node.Sval == "System"){
-                    moveToTopLevel(); 
-                }  
+                    moveToTopLevel(node.Sval); 
+                }else{
+                    moveToTopLevel(node.Sval); 
+                }
 
                 break;
-
             default:
                 break;
         }
@@ -62,8 +65,12 @@ public class NsVisitor: Visitor {
     }
 
 
-    public void moveToTopLevel(){
-        //I don't know what to do here.  
+    public void moveToTopLevel(String s){
+        //I don't know what to do here. 
+        NameSpace temp = new NameSpace(s);
+        NameSpace.TopLevelNames.AddMember(temp);
+        //Console.Print(s);
+        //Console.Print('Added to Namespace');
     }
 
 
