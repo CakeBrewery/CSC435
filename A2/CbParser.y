@@ -20,6 +20,8 @@
 // Author:  Nigel Horspool
 // Date:    June 2014
 
+
+
 %namespace  FrontEnd
 %tokentype  Tokens
 %output=CbParser.cs
@@ -257,28 +259,46 @@ UnaryExpr:      '-' Expr
 
 UnaryExprNotUMinus:
                 Designator
+                	{ $$ = $1; }
         |       Designator '(' OptActuals ')'
+        		{ $$ = AST.NonLeaf(NodeType.Call, LineNumber, $1, $3); }
         |       Kwd_null
+        		{ $$ = AST.Leaf(NodeType.Null, LineNumber); }
         |       IntConst
+			{ $$ = AST.Leaf(NodeType.IntConst, LineNumber, Convert.ToInt32(lexer.yytext)); }
         |       CharConst
+        		{ $$ = AST.Leaf(NodeType.CharConst, LineNumber, lexer.yytext); }	
         |       StringConst
+        		{ $$ = AST.Leaf(NodeType.StringConst, LineNumber, lexer.yytext); }
         |       StringConst '.' Identifier // Identifier must be "Length"
+        		{ $$ = AST.NonLeaf(NodeType.Dot, LineNumber, $1, $3);}
         |       Kwd_new Identifier '(' ')'
+        		{ $$ = AST.NonLeaf(NodeType.NewClass, LineNumber, $2);}
         |       Kwd_new TypeName '[' Expr ']'
+        		{ $$ = AST.NonLeaf(NodeType.NewArray, LineNumber, $2, $4);}
         |       '(' Expr ')'
+        		{ $$ = $1; }
         |       '(' Expr ')' UnaryExprNotUMinus                 // cast
+        		{ $$ = AST.NonLeaf(NodeType.Cast, LineNumber, $2, $4); }
         |       '(' BuiltInType ')' UnaryExprNotUMinus          // cast
+        		{ $$ = AST.NonLeaf(NodeType.Cast, LineNumber, $2, $4); }
         |       '(' BuiltInType '[' ']' ')' UnaryExprNotUMinus  // cast
+        		{ $$ = AST.NonLeaf(NodeType.Cast, LineNumber, $2, $6); }
 
         ;
 
 Designator:     Identifier Qualifiers
+			{ $$ = AST.repNull($2, $1); }
         ;
 
 Qualifiers:     '.' Identifier Qualifiers
+			{ AST t = AST.NonLeaf(NodeType.Dot, LineNumber, null, $2); $$ = AST.repNull($3,t); }
         |       '[' Expr ']' Qualifiers
+        		{ AST t = AST.NonLeaf(NodeType.Index, LineNumber, null, $2); $$ = AST.repNull($4,t); }
         |       '[' ']' Qualifiers   // needed for cast syntax
+        		{ AST t = AST.NonLeaf(NodeType.Array, LineNumber, null); $$ = AST.repNull($3,t); }
         |       /* empty */
+        		{ $$ = null; }
         ;
 
 Identifier:     Ident   { $$ = AST.Leaf(NodeType.Ident, LineNumber, lexer.yytext); }

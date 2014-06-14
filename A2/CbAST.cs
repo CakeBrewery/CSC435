@@ -13,6 +13,8 @@ using System.Collections.Generic;
 
 namespace FrontEnd {
 
+
+
 public enum NodeType {
     Program, UsingList, ClassList, Class, MemberList, Const, Field,
     Method, IdList, FormalList, Formal,
@@ -37,6 +39,20 @@ public abstract class AST {
     public CbType Type { get; set; }
 
     public int LineNumber {  get; protected set; }
+
+ static public AST repNull( AST tree, AST replacement ) {
+ 	if (tree == null) return replacement;
+ 	AST_nonleaf np = tree as AST_nonleaf;
+ 	for( ; ; ) {
+ 		if (np == null)
+ 			throw new Exception("error restructuring Qualifiers");
+ 		if (np[0] == null)
+ 			break;
+ 		np = np[0] as AST_nonleaf;
+ 	}
+ 	np[0] = replacement;
+ 	return tree;
+ }
 
     public NodeType Tag { get; protected set; }
 
