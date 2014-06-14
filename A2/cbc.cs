@@ -97,6 +97,10 @@ public class Start {
 
         CbType.Initialize();  // initialize some predefined types and top-level namespace
 
+
+        NsVisitor nspVisitor = new NsVisitor(); 
+        tree.Accept(nspVisitor, 0); 
+
         // Create and invoke your top-level namespace visitor here
         
         if (printNS)
