@@ -44,9 +44,21 @@ public class NsVisitor: Visitor {
 
             case USINGLIST:
                 if(node.Sval == "System"){
-                    moveToTopLevel(node.Sval); 
-                }else{
-                    moveToTopLevel(node.Sval); 
+                    NameSpace system = (NameSpace)NameSpace.TopLevelNames.LookUp("System");
+
+                    CbClass obj = (CbClass) system.LookUp("Object");
+                    NameSpace.TopLevelNames.AddMember(obj);
+
+                    CbClass st = (CbClass) system.LookUp("String");
+                    NameSpace.TopLevelNames.AddMember(st);
+                    
+                    CbClass console = (CbClass) system.LookUp("Console");
+                    NameSpace.TopLevelNames.AddMember(console);
+
+                    CbClass i32 = (CbClass) system.LookUp("Int32");
+                    NameSpace.TopLevelNames.AddMember(i32);
+                        
+
                 }
 
                 break;
@@ -56,6 +68,25 @@ public class NsVisitor: Visitor {
     }
 
     public override void Visit( AST_nonleaf node, object data ) {
+        switch((int)data){
+            case CLASSLIST:
+                if(node.Tag == NodeType.Class){
+
+                    NameSpace top = NameSpace.TopLevelNames;
+                    CbClass parent = null;
+                    if (node[1] != null) {
+                        parent = (CbClass) top.LookUp(((AST_leaf)node[1]).Sval);
+                    }
+
+                    CbClass temp = new CbClass(((AST_leaf)node[0]).Sval, parent);
+                    top.AddMember(temp);
+                }
+                break;
+
+            default:
+                break;
+        }
+
         int arity = node.NumChildren;
         for( int i = 0; i < arity; i++ ) {
             AST ch = node[i];
