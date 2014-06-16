@@ -48,7 +48,11 @@ public class NsVisitor: Visitor {
     }
 
     public override void Visit(AST_leaf node, object data) {
+    
+    
         switch((int)data){
+        
+            
 
             case USINGLIST:
 
@@ -78,6 +82,7 @@ public class NsVisitor: Visitor {
     public override void Visit( AST_nonleaf node, object data ) {
         NameSpace toplevel = NameSpace.TopLevelNames;
         int arity = node.NumChildren;
+        bool noDuplicateClass = true;
 
         switch((int)data){
             case CLASSLIST:
@@ -87,7 +92,7 @@ public class NsVisitor: Visitor {
                         parent = (CbClass)toplevel.LookUp(((AST_leaf)node[1]).Sval);
                     }
                     CbClass temp = new CbClass(((AST_leaf)node[0]).Sval, parent);
-                    toplevel.AddMember(temp);
+                    noDuplicateClass = noDuplicateClass && toplevel.AddMember(temp);
                     parents.Push(temp); 
                 }
 
@@ -103,7 +108,7 @@ public class NsVisitor: Visitor {
                 }
 
                 //Store the parameter types of current method
-                IList<CbType> param = new List<CbType>(); 
+                List<CbType> param = new List<CbType>(); 
 
                 //If current node is a method
                 if(node.Tag == NodeType.Method){
@@ -121,28 +126,54 @@ public class NsVisitor: Visitor {
                         //add type to parameter list
                         param.Add(c_type); 
                     }
+                    
+                    //if(((AST_kary)node[2]).NumChildren == 0){
+                    //	param = null;
+                    //}
 
                     //Create a new method
-                    CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, new List<CbType> {CbType.Object});
+                    //CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, new List<CbType> {CbType.Object});
 
                     //This should be the correct way, but it does not work for some reason. 
-                    //CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, param);
+                    CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, param);
 
                     //add this method to its parent class
-                    parents.Peek().AddMember(new_method);
+                    noDuplicateClass = noDuplicateClass && parents.Peek().AddMember(new_method);
                 }
 
                 //Process constant declarations
                 else if(node.Tag == NodeType.Const){
+                    type = FindType(((AST_leaf)node[0]).Sval);
+                
                     CbConst new_const = new CbConst(((AST_leaf)node[1]).Sval, type);
 
                     //add this const to its parent class
-                    parents.Peek().AddMember(new_const);
+                    noDuplicateClass = noDuplicateClass && parents.Peek().AddMember(new_const);
+                }
+               
+               
+                 //Process field declarations
+                 else if(node.Tag == NodeType.Field){
+                     type = FindType(((AST_leaf)node[0]).Sval);
+                 
+                     for(int i = 0; i<((AST_kary)node[1]).NumChildren; i++){
+                     	CbField new_field = new CbField(((AST_leaf)(node[1][i])).Sval, type);
+ 
+                     	//add this const to its parent class
+                     	noDuplicateClass = noDuplicateClass && parents.Peek().AddMember(new_field);
+                     }
                 }
                 break; 
 
             default:
                 break;
+                
+
+        }
+        
+        if(noDuplicateClass == false){
+	            Console.Write("Duplicate detected at line ");
+	            Console.Write(node.LineNumber);
         }
 
         for( int i = 0; i < arity; i++ ) {
@@ -153,12 +184,20 @@ public class NsVisitor: Visitor {
     }
 
 
-    public void moveToTopLevel(String s){
-        //I don't know what to do here. 
-        NameSpace temp = new NameSpace(s);
-        NameSpace.TopLevelNames.AddMember(temp);
-        //Console.Print(s);
-        //Console.Print('Added to Namespace');
+
+    
+    public CbType FindType(String s){
+        CbType type = CbType.Void; 
+    
+    	if(String.Compare("int", s) == 0)
+    		type = CbType.Int;
+    	else if(String.Compare("bool", s) == 0)
+    		type = CbType.Bool;
+    	else if(String.Compare("char", s) == 0)
+    		type = CbType.Char;
+    	else
+    		type = new CbClass(s, null);
+    	return type;
     }
 
 }
