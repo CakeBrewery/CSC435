@@ -9,7 +9,10 @@ namespace FrontEnd {
 
 public class NsVisitor: Visitor {
 
-    public Stack<CbClass> parents = new Stack<CbClass>();
+    //a stack to keep track of parent classes
+    public Stack<CbClass> parents;
+
+    //#define statements
     public const int USINGLIST = 0; 
     public const int CLASSLIST = 1; 
     public const int MEMBERLIST = 2; 
@@ -17,7 +20,8 @@ public class NsVisitor: Visitor {
     //public static NameSpace TopLevelNames = new NameSpace("");
 
     public NsVisitor() {
-
+        //Constructor
+        parents = new Stack<CbClass>();
     }
 
     public override void Visit(AST_kary node, object data) {
@@ -25,6 +29,7 @@ public class NsVisitor: Visitor {
         for( int i = 0; i < arity; i++ ) {
             AST ch = node[i];
             if (ch != null){
+                //Process the nodes according to tags
                 switch(node.Tag){
                     case NodeType.UsingList:
                         ch.Accept(this, USINGLIST);
@@ -46,6 +51,8 @@ public class NsVisitor: Visitor {
         switch((int)data){
 
             case USINGLIST:
+
+                //Copy contents of System to TopLevelNames
                 if(node.Sval == "System"){
                     NameSpace system = (NameSpace)NameSpace.TopLevelNames.LookUp("System");
 
@@ -86,8 +93,8 @@ public class NsVisitor: Visitor {
 
                 break;
 
-
             case MEMBERLIST:
+
                 CbType type; 
                 if(node[0] == null){
                     type = CbType.Void;
@@ -95,14 +102,14 @@ public class NsVisitor: Visitor {
                     type = node[0].Type;
                 }
 
+                //Store the parameter types of current method
                 IList<CbType> param = new List<CbType>(); 
 
-
-
+                //If current node is a method
                 if(node.Tag == NodeType.Method){
-
                     for(int i = 0; i < ((AST_kary)node[2]).NumChildren; i++){
-                        Console.WriteLine("test"); 
+
+                        //Get type of current parameter
                         CbType c_type;
                         if(node[2][i] == null){
                             c_type = CbType.Void;
@@ -111,15 +118,25 @@ public class NsVisitor: Visitor {
                             c_type = node[2][i].Type;
                         }
 
+                        //add type to parameter list
                         param.Add(c_type); 
                     }
 
-                    CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, /*param (this doesn't work for some reason) */ new List<CbType> {CbType.Object});
+                    //Create a new method
+                    CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, new List<CbType> {CbType.Object});
 
+                    //This should be the correct way, but it does not work for some reason. 
+                    //CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, param);
+
+                    //add this method to its parent class
                     parents.Peek().AddMember(new_method);
                 }
+
+                //Process constant declarations
                 else if(node.Tag == NodeType.Const){
                     CbConst new_const = new CbConst(((AST_leaf)node[1]).Sval, type);
+
+                    //add this const to its parent class
                     parents.Peek().AddMember(new_const);
                 }
                 break; 
@@ -127,7 +144,6 @@ public class NsVisitor: Visitor {
             default:
                 break;
         }
-
 
         for( int i = 0; i < arity; i++ ) {
             AST ch = node[i];
