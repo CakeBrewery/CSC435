@@ -72,14 +72,14 @@ public class NsVisitor: Visitor {
             case CLASSLIST:
                 if(node.Tag == NodeType.Class){
 
-                    NameSpace top = NameSpace.TopLevelNames;
+                    NameSpace toplevel = NameSpace.TopLevelNames;
                     CbClass parent = null;
                     if (node[1] != null) {
-                        parent = (CbClass) top.LookUp(((AST_leaf)node[1]).Sval);
+                        parent = (CbClass) toplevel.LookUp(((AST_leaf)node[1]).Sval);
                     }
 
                     CbClass temp = new CbClass(((AST_leaf)node[0]).Sval, parent);
-                    top.AddMember(temp);
+                    toplevel.AddMember(temp);
                 }
                 break;
 
