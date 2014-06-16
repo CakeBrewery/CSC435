@@ -26,7 +26,6 @@ class Digit: List {
         Console.Write(d);
         if (next != null) next.Print();
     }
-    public override void Add(int i) {}
 }
 
 class Lists {

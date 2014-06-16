@@ -5,8 +5,11 @@ using System.Collections.Generic;
 
 namespace FrontEnd {
 
+
+
 public class NsVisitor: Visitor {
 
+    public Stack<CbClass> parents = new Stack<CbClass>();
     public const int USINGLIST = 0; 
     public const int CLASSLIST = 1; 
     public const int MEMBERLIST = 2; 
@@ -57,8 +60,6 @@ public class NsVisitor: Visitor {
 
                     CbClass i32 = (CbClass) system.LookUp("Int32");
                     NameSpace.TopLevelNames.AddMember(i32);
-                        
-
                 }
 
                 break;
@@ -68,26 +69,66 @@ public class NsVisitor: Visitor {
     }
 
     public override void Visit( AST_nonleaf node, object data ) {
+        NameSpace toplevel = NameSpace.TopLevelNames;
+        int arity = node.NumChildren;
+
         switch((int)data){
             case CLASSLIST:
                 if(node.Tag == NodeType.Class){
-
-                    NameSpace toplevel = NameSpace.TopLevelNames;
                     CbClass parent = null;
                     if (node[1] != null) {
-                        parent = (CbClass) toplevel.LookUp(((AST_leaf)node[1]).Sval);
+                        parent = (CbClass)toplevel.LookUp(((AST_leaf)node[1]).Sval);
                     }
-
                     CbClass temp = new CbClass(((AST_leaf)node[0]).Sval, parent);
                     toplevel.AddMember(temp);
+                    parents.Push(temp); 
                 }
+
                 break;
+
+
+            case MEMBERLIST:
+                CbType type; 
+                if(node[0] == null){
+                    type = CbType.Void;
+                }else{
+                    type = node[0].Type;
+                }
+
+                IList<CbType> param = new List<CbType>(); 
+
+
+
+                if(node.Tag == NodeType.Method){
+
+                    for(int i = 0; i < ((AST_kary)node[2]).NumChildren; i++){
+                        Console.WriteLine("test"); 
+                        CbType c_type;
+                        if(node[2][i] == null){
+                            c_type = CbType.Void;
+                        }
+                        else{
+                            c_type = node[2][i].Type;
+                        }
+
+                        param.Add(c_type); 
+                    }
+
+                    CbMethod new_method = new CbMethod(((AST_leaf)node[1]).Sval, true, type, /*param (this doesn't work for some reason) */ new List<CbType> {CbType.Object});
+
+                    parents.Peek().AddMember(new_method);
+                }
+                else if(node.Tag == NodeType.Const){
+                    CbConst new_const = new CbConst(((AST_leaf)node[1]).Sval, type);
+                    parents.Peek().AddMember(new_const);
+                }
+                break; 
 
             default:
                 break;
         }
 
-        int arity = node.NumChildren;
+
         for( int i = 0; i < arity; i++ ) {
             AST ch = node[i];
             if (ch != null)
@@ -103,7 +144,6 @@ public class NsVisitor: Visitor {
         //Console.Print(s);
         //Console.Print('Added to Namespace');
     }
-
 
 }
 }

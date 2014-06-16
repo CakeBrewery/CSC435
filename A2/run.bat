@@ -1,1 +1,1 @@
-cbc CbExample.cs -ast
+cbc CbExample.cs -ast -ns
