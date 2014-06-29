@@ -127,6 +127,16 @@ public class CbClass: CbType {
         Members[mem.Name] = mem;
         return true;
     }
+    
+    public CbConst FindMember( string name ) {
+    	if (!Members.ContainsKey(name)) return null; //FAIL -- no such member exists
+    	foreach(CbMember cm in Members.Values) {
+    	    if( string.Compare(cm.Name, name) == 0){
+    	    	return (CbConst)cm;
+    	    }
+    	}
+    	return null; //FAIL -- no such member exists (this code should never be reached)
+    }
 
     public override void Print(TextWriter p) {
         Print(p, "");
