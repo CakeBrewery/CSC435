@@ -27,6 +27,7 @@ namespace FrontEnd {
 // or const type description as appropriate).
 public class TCVisitor1: Visitor {
     private Dictionary<string, AST> pendingClassDefns = null;
+    private NameSpace currentNameSpace = null;
 
     // constructor
     public TCVisitor1( ) {
@@ -36,9 +37,11 @@ public class TCVisitor1: Visitor {
 	    Dictionary<string, AST> savedList;
         switch(node.Tag) {
         case NodeType.UsingList: //Do Nothing
+        	currentNameSpace = (NameSpace)data;
 	        Debug.Assert(data != null && data is NameSpace);
             break;
         case NodeType.ClassList:
+        	currentNameSpace = (NameSpace)data;
 	        Debug.Assert(data != null && data is NameSpace);
             // add each class to the current namespace, by continuing traversal
             for(int i=0; i<node.NumChildren; i++) {
@@ -61,10 +64,12 @@ public class TCVisitor1: Visitor {
         switch(node.Tag) {
         case NodeType.Program: //Modified in-line with hints
             Debug.Assert(data != null && data is NameSpace);
+            currentNameSpace = (NameSpace)data;
             node[1].Accept(this, data);  // visit class declarations
             break;
         case NodeType.Class: //Modified in-line with hints
             Debug.Assert(data != null && data is NameSpace);
+            currentNameSpace = (NameSpace)data;
             NameSpace ns = (NameSpace)data;
             AST_kary memberList = node[2] as AST_kary;
             // Look up CbType type description   
@@ -83,37 +88,97 @@ public class TCVisitor1: Visitor {
 	    CbClass c1 = (CbClass)data;
             // find const in class
             AST_leaf cid = (AST_leaf)(node[1]);
-            CbConst cdef = c1.FindMember(cid.Sval);
+            CbConst cdef = (CbConst)c1.FindMember(cid.Sval);
             if(cdef != null){
             	cdef.Type = node[0].Type;
             }
             break;
         case NodeType.Field:
 	    Debug.Assert(data != null && data is CbClass);
-	    CbClass c1 = (CbClass)data;
+	    CbClass c2 = (CbClass)data;
             // find field in class
-            AST_leaf cid = (AST_leaf)(node[1]); //FIXME: Node is in fact a list
-            CbConst cdef = c1.FindMember(cid.Sval);
-            if(cdef != null){
-            	cdef.Type = node[0].Type;
+            AST_kary fields = (AST_kary)(node[1]);
+            for(int i=0; i<fields.NumChildren; i++) {
+                AST_leaf id = fields[i] as AST_leaf;
+                CbField fdef = (CbField)c2.FindMember(id.Sval);
+                if(fdef != null){
+                    fdef.Type = id.Type; //Add Types
+                }
             }
             break;
         case NodeType.Method:
 	        Debug.Assert(data != null && data is CbClass);
 	        CbClass c3 = (CbClass)data;
-            // add method name to current class
+            // look up method in current class
             AST_leaf mid = (AST_leaf)(node[1]);
-            AST attr = node[4];
-            CbMethod mdef = new CbMethod(mid.Sval, attr.Tag==NodeType.Static, null, null);
-            c3.AddMember(mdef);
+            CbMethod mdef = (CbMethod)c3.FindMember(mid.Sval);
+            // store return type (node 0)
+            
+            if(node[0] != null && mdef != null){
+            	if(node[0].Type != null){
+            	     mdef.Type = node[0].Type;
+            	}
+            }
+            // store arguments type
+            mdef.ArgType = new List<CbType>();
+            AST_kary formalList = node[2] as AST_kary;
+            for(int i=0; i<formalList.NumChildren; i++) {
+	    	formalList[i].Accept(this,mdef);
+            }
             break;
+        case NodeType.Formal:
+            node[0].Accept(this, data);
+       	    break;
+       	case NodeType.Array:
+       	    switch(((AST_leaf)node[0]).Tag){
+       	    case NodeType.IntType:
+       	    	((CbMethod)data).ArgType.Add(CbType.Array(CbType.Int));
+       	    	break;
+       	    case NodeType.CharType:
+       	    	((CbMethod)data).ArgType.Add(CbType.Array(CbType.Char));
+       	    	break;
+       	    case NodeType.StringType:
+       	    	((CbMethod)data).ArgType.Add(CbType.Array(CbType.String));
+       	    	break;
+       	    case NodeType.VoidType:
+       	    	((CbMethod)data).ArgType.Add(CbType.Array(CbType.Void));
+       	    	break;
+       	    case NodeType.Ident:
+            	object classIdent = currentNameSpace.LookUp(((AST_leaf)node[0]).Sval);
+            	Debug.Assert(classIdent is CbClass);
+            	((CbMethod)data).ArgType.Add(CbType.Array((CbType)classIdent));
+       	    	break;
+       	    default:
+       	    	break;
+	    } 
+       	    break;
         default:
             throw new Exception("Unexpected tag: "+node.Tag);
         }
     }
 
 	public override void Visit(AST_leaf node, object data) {
-	    throw new Exception("TLVisitor traversal should not have reached a leaf node");
+	switch(node.Tag) {
+        case NodeType.IntType:
+            ((CbMethod)data).ArgType.Add(CbType.Int);
+       	    break;
+        case NodeType.CharType:
+            ((CbMethod)data).ArgType.Add(CbType.Char);
+       	    break;
+        case NodeType.StringType:
+            ((CbMethod)data).ArgType.Add(CbType.String);
+       	    break;
+        case NodeType.VoidType:
+            ((CbMethod)data).ArgType.Add(CbType.Void);
+       	    break;
+        case NodeType.Ident: //check current namespace
+            object classIdent = currentNameSpace.LookUp(node.Sval);
+            Debug.Assert(classIdent is CbClass);
+            ((CbMethod)data).ArgType.Add((CbType)classIdent);
+       	    break;
+       	default:
+       	    throw new Exception("Unexpected tag: "+node.Tag);
+       	}
     }
 
     private void openNameSpace( AST ns2open, NameSpace currentNS ) {
