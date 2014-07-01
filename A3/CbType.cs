@@ -128,11 +128,11 @@ public class CbClass: CbType {
         return true;
     }
     
-    public CbConst FindMember( string name ) {
+    public CbMember FindMember( string name ) {
     	if (!Members.ContainsKey(name)) return null; //FAIL -- no such member exists
     	foreach(CbMember cm in Members.Values) {
     	    if( string.Compare(cm.Name, name) == 0){
-    	    	return (CbConst)cm;
+    	    	return cm;
     	    }
     	}
     	return null; //FAIL -- no such member exists (this code should never be reached)
