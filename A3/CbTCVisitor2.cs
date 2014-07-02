@@ -131,13 +131,25 @@ public class TCVisitor2: Visitor {
             break;
         case NodeType.If:
             node[0].Accept(this,data);
-            /* TODO ... check type */
+
+            /* (DONE?) */
+            if (node[0].Type != CbType.Bool){
+                Start.SemanticError(node[0].LineNumber, "invalid if");
+                node.Type = CbType.Error; 
+            }
+
             node[1].Accept(this,data);
             node[2].Accept(this,data);
             break;
         case NodeType.While:
             node[0].Accept(this,data);
-            /* TODO ... check type */
+
+            /* (DONE?) */
+            if(node[0].Type != CbType.Bool){
+                Start.SemanticError(node[0].LineNumber, "invalid while"); 
+                node.Type = CbType.Error; 
+            }
+
             loopNesting++;
             node[1].Accept(this,data);
             loopNesting--;
@@ -149,7 +161,11 @@ public class TCVisitor2: Visitor {
                 break;
             }
             node[0].Accept(this,data);
-            /* TODO ... check type of method result */
+
+            /* (DONE?) TODO ... check type of method result */
+            if(!isAssignmentCompatible(currentMethod.ResultType, node[0].Type)){
+                Start.SemanticError(node.LineNumber, "Invalid return type"); 
+            }
             break;
         case NodeType.Call:
             node[0].Accept(this,data); // method name (could be a dotted expression)
@@ -215,30 +231,85 @@ public class TCVisitor2: Visitor {
         case NodeType.NewArray:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
-            /* TODO ... check types */
-            node.Type = CbType.Array(node[0].Type);
+
+
+            /* (DONE?) TODO ... check types */
+            //check array type
+            if (node[0].Type != CbType.Int && node[0].Type != CbType.Char
+                && node[0].Type != CbType.String){
+                Start.SemanticError(node[0].LineNumber, "Invalid array type"); 
+                node.Type = CbType.Error;
+            }
+
+            //check size type
+            if(node[1].Type != CbType.Int){
+                Start.SemanticError(node[1].LineNumber, "Array size must be an Int");
+                node.Type = CbType.Error; 
+            }
+
+
+            else{
+              node.Type = CbType.Array(node[0].Type);
+            }
             break;
         case NodeType.NewClass:
             node[0].Accept(this,data);
-            /* TODO ... check that operand is a class */
-            node.Type = node[0].Type;
+
+
+            /* (DONE?) TODO ... check that operand is a class */
+            if(!(node[0].Type is CbClass)){
+                Start.SemanticError(node[0].LineNumber, "{0} is not a class type");
+                node.Type = CbType.Error;
+            }
+
+            else{
+                node.Type = node[0].Type;
+            }
             break;
         case NodeType.PlusPlus:
         case NodeType.MinusMinus:
             node[0].Accept(this,data);
-            /* TODO ... check types and operand must be a variable */
-            node.Type = node[0].Type;
+
+            /* (DONE?) TODO ... check types and operand must be a variable */
+            //Make sure it's an integer type
+            if(!isIntegerType(node[0].Type)){
+                Start.SemanticError(node[0].LineNumber, "decrement and increment can only be done on integer variables"); 
+                node.Type = CbType.Error; 
+            }
+
+            //make sure it's a variable
+            else if(node[0].Kind != CbKind.Variable){
+                Start.SemanticError(node[0].LineNumber, "decrement and increment can only be done on variables"); 
+                node.Type = CbType.Error; 
+            }
+
+            else{
+                node.Type = node[0].Type;
+            }
+
             break;
         case NodeType.UnaryPlus:
         case NodeType.UnaryMinus:
             node[0].Accept(this,data);
-            /* TODO ... check types */
-            node.Type = CbType.Int;
+
+            /* (DONE?) TODO ... check types */
+            if(!isIntegerType(node[0].Type)){
+                Start.SemanticError(node[0].LineNumber, "Unary minus can only be done on integers"); 
+                node.Type = CbType.Error; 
+            }
+
+            else{
+                node.Type = CbType.Int;
+            }
             break;
         case NodeType.Index:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
+
             /* TODO ... check types */
+            /* ?????? */
+
+
             node.Type = CbType.Error;  // FIX THIS
             break;
         case NodeType.Add:
@@ -248,8 +319,26 @@ public class TCVisitor2: Visitor {
         case NodeType.Mod:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
-            /* TODO ... check types */
-            node.Type = CbType.Error;  // FIX THIS
+
+
+            /* (DONE?) TODO ... check types */
+            if(node[0].Type == CbType.Int && node[1].Type == CbType.Int){
+                node.Type = CbType.Int; 
+            }
+            else if(node[0].Type == CbType.Char && node[1].Type == CbType.Char){
+                node.Type = CbType.Char; 
+            }
+            else if(node[0].Type == CbType.Int && node[1].Type == CbType.Char){
+                node.Type = CbType.Int; 
+            }
+            else if(node[0].Type == CbType.Char && node[1].Type == CbType.Int){
+                node.Type = CbType.Int; 
+            }
+            else{
+                Start.SemanticError(node[0].LineNumber, "Invalid operator types"); 
+                node.Type = CbType.Error; 
+            }
+            
             break;
         case NodeType.Equals:
         case NodeType.NotEquals:
