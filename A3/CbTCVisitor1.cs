@@ -94,6 +94,7 @@ public class TCVisitor1: Visitor {
             CbMethod cmed = new CbMethod("temp", false, CbType.Void, new List<CbType>());
             node[0].Accept(this, cmed);
             cdef.Type = cmed.ArgType[0];
+            node[0].Type = cmed.ArgType[0];
             break;
         case NodeType.Field:
 	    Debug.Assert(data != null && data is CbClass);
@@ -106,6 +107,7 @@ public class TCVisitor1: Visitor {
             	CbMethod cmed2 = new CbMethod("temp", false, CbType.Void, new List<CbType>());
             	node[0].Accept(this, cmed2);
             	fdef.Type = cmed2.ArgType[0];
+            	id.Type = cmed2.ArgType[0];
             }
             break;
         case NodeType.Method:

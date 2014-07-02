@@ -171,6 +171,10 @@ public class TCVisitor2: Visitor {
             node[0].Accept(this,data); // method name (could be a dotted expression)
             node[1].Accept(this,data); // actual parameters
             /* TODO ... check types */
+            
+            //Check parameters
+            List<CbType> checkList = new List<CbType>();
+            
             node.Type = CbType.Error;  // FIX THIS
             break;
         case NodeType.Dot:
