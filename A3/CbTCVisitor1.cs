@@ -43,7 +43,7 @@ public class TCVisitor1: Visitor {
         case NodeType.ClassList:
         	currentNameSpace = (NameSpace)data;
 	        Debug.Assert(data != null && data is NameSpace);
-            // add each class to the current namespace, by continuing traversal
+            // traverse each class
             for(int i=0; i<node.NumChildren; i++) {
                 node[i].Accept(this, data);
             }
@@ -79,6 +79,7 @@ public class TCVisitor1: Visitor {
             Debug.Assert(ctd is CbClass);
             CbClass classTypeDefn = (CbClass)ctd;
  	    // Visit each member of the class, passing CbType as a parameter 
+            //memberList.Accept(this, classTypeDefn);
             for(int i=0; i<memberList.NumChildren; i++) {
                 memberList[i].Accept(this,classTypeDefn);
             }
@@ -89,9 +90,10 @@ public class TCVisitor1: Visitor {
             // find const in class
             AST_leaf cid = (AST_leaf)(node[1]);
             CbConst cdef = (CbConst)c1.FindMember(cid.Sval);
-            if(cdef != null){
-            	cdef.Type = node[0].Type;
-            }
+            
+            CbMethod cmed = new CbMethod("temp", false, CbType.Void, new List<CbType>());
+            node[0].Accept(this, cmed);
+            cdef.Type = cmed.ArgType[0];
             break;
         case NodeType.Field:
 	    Debug.Assert(data != null && data is CbClass);
@@ -101,9 +103,9 @@ public class TCVisitor1: Visitor {
             for(int i=0; i<fields.NumChildren; i++) {
                 AST_leaf id = fields[i] as AST_leaf;
                 CbField fdef = (CbField)c2.FindMember(id.Sval);
-                if(fdef != null){
-                    fdef.Type = id.Type; //Add Types
-                }
+            	CbMethod cmed2 = new CbMethod("temp", false, CbType.Void, new List<CbType>());
+            	node[0].Accept(this, cmed2);
+            	fdef.Type = cmed2.ArgType[0];
             }
             break;
         case NodeType.Method:
