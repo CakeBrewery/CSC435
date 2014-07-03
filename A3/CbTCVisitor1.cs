@@ -168,20 +168,25 @@ public class TCVisitor1: Visitor {
 	switch(node.Tag) {
         case NodeType.IntType:
             ((CbMethod)data).ArgType.Add(CbType.Int);
+            node.Type = CbType.Int;
        	    break;
         case NodeType.CharType:
             ((CbMethod)data).ArgType.Add(CbType.Char);
+            node.Type = CbType.Char;
        	    break;
         case NodeType.StringType:
             ((CbMethod)data).ArgType.Add(CbType.String);
+            node.Type = CbType.String;
        	    break;
         case NodeType.VoidType:
             ((CbMethod)data).ArgType.Add(CbType.Void);
+            node.Type = CbType.Void;
        	    break;
         case NodeType.Ident: //check current namespace
             object classIdent = currentNameSpace.LookUp(node.Sval);
             Debug.Assert(classIdent is CbClass);
             ((CbMethod)data).ArgType.Add((CbType)classIdent);
+            node.Type = (CbType)classIdent;
        	    break;
        	default:
        	    throw new Exception("Unexpected tag: "+node.Tag);
