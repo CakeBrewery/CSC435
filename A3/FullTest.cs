@@ -14,6 +14,9 @@ class Foo {
         f = new Bar();
         int r;
         r = f.Umm(3,4);
+        int x;
+        x = (int)r;
+        x = (x)r;
     }
 
     public virtual int Ummm( int a, int b ) {

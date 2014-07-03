@@ -458,12 +458,25 @@ public class TCVisitor2: Visitor {
         return false;
     }
     
-    private void checkTypeSyntax(AST n) {
-        /* TODO
-           code to check whether n is the subtree that has appropriate AST
-           structure for a Cb type. It could be a builtin type (int, char,
-           string), a class, or an array whose elements have a valid type.
-        */
+    private void checkTypeSyntax(AST n) { (DONE ?)
+    	switch(n.Tag){
+    	case NodeType.IntType:
+    		break;
+    	case NodeType.CharType:
+    		break;
+    	case NodeType.StringType:
+    		break;
+    	case NodeType.Ident:
+    		String name = ((AST_leaf)n).Sval;
+    		CbClass t = ns.LookUp(name) as CbClass;
+    		if(t == null){
+    			Start.SemanticError(n.LineNumber, "Invalid Cast");
+    		}
+    		break;
+    	default:
+    		Start.SemanticError(n.LineNumber, "Invalid Cast");     
+    		break;
+    	}
     }
 
     private bool isCastable(CbType dest, CbType src) {
