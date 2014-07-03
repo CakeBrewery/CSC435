@@ -134,6 +134,8 @@ public class Start {
         tree.Accept(tlv, NameSpace.TopLevelNames);
         TCVisitor1 tcv1 = new TCVisitor1();
         tree.Accept(tcv1, NameSpace.TopLevelNames);
+        TCVisitor2 tcv2 = new TCVisitor2();
+        tree.Accept(tcv2, NameSpace.TopLevelNames);
         
 
 
