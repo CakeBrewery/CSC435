@@ -281,6 +281,27 @@ public class CbMethod: CbMember {
         } else
             p.WriteLine();
     }
+    
+    public bool Identical(CbMethod other){
+    	bool isIdentical = true;
+    	List<CbType> temp = new List<CbType>(other.ArgType);
+    	
+    	foreach(CbType at in ArgType) {
+    		if(!temp.Remove(at)){
+    			isIdentical = false;
+    		}
+    	}
+    	
+    	if(temp.Count != 0){
+    		isIdentical = false;
+    	}
+    	
+    	if(ResultType != other.ResultType){
+    		isIdentical = false;
+    	}
+    	
+    	return isIdentical;
+    }
 }
 
 } // end of namespace FrontEnd

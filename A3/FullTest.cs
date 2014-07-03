@@ -34,4 +34,8 @@ class Bar : Foo {
         System.Console.WriteLine("This is Bar");
         return a-b;
     }
+    
+    public static int Ummm(int a, int b) {
+    return a*b;
+    }
 }

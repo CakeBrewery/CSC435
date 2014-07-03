@@ -528,6 +528,26 @@ public class TCVisitor2: Visitor {
     
     private void checkOverride(AST_nonleaf node) {
         string name = currentMethod.Name;
+        CbClass checking = currentClass.Parent;
+        while(checking != null){
+        	CbMember temp = checking.FindMember(name);
+        	if(temp != null){ //a duplicate exists
+        		bool valid = false;
+        		if(temp is CbMethod){
+        			if(((CbMethod)temp).Identical(currentMethod)){
+        				if(!(((CbMethod)temp).IsStatic) && !(currentMethod.IsStatic)){
+        					if(node[4].Tag == NodeType.Override){
+        						valid = true;	
+        					}
+        				}
+        			}
+        		}
+        		if(!valid){
+				Start.SemanticError(node.LineNumber, "Invalid Override"); 
+        		}
+        	}
+        	checking  = checking.Parent;
+        }
         // search for a member in any ancestor with same name
         /* TODO
            code to check whether any ancestor class contains a member with
