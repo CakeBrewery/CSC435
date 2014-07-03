@@ -348,8 +348,13 @@ public class TCVisitor2: Visitor {
         case NodeType.NotEquals:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
-            node.Type = CbType.Bool;           
-            /* TODO ... check types */
+            /* (DONE?) TODO ... check types */
+            if(node[0].Type == node[1].Type){
+                node.Type = CbType.Bool;
+            }
+            else{
+                Start.SemanticError(node[0].LineNumber, "compairson must be between operators of the same type");
+            }
             break;
         case NodeType.LessThan:
         case NodeType.GreaterThan:
@@ -358,14 +363,23 @@ public class TCVisitor2: Visitor {
             node[0].Accept(this,data);
             node[1].Accept(this,data);
             node.Type = CbType.Bool;
-            /* TODO ... check types */
+            /* (DONE?) TODO ... check types */
+            if(!isIntegerType(node[0].Type) || !isIntegerType(node[1].Type)){
+                Start.SemanticError(node[0].LineNumber, "Comparison must be between integer types");
+                node.Type = CbType.Error; 
+            }
             break;
         case NodeType.And:
         case NodeType.Or:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
-            /* TODO ... check types */
+            /* (DONE?) TODO ... check types */
             node.Type = CbType.Bool;
+
+            if(node[0].Type != CbType.Bool || node[1].Type != CbType.Bool){
+                Start.SemanticError(node[0].LineNumber, "&& and || must be done between boolean exppressions");
+                node.Type = CbType.Error; 
+            }
             break;
         default:
             throw new Exception("Unexpected tag: "+node.Tag);  
