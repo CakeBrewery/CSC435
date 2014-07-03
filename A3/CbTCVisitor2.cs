@@ -449,7 +449,16 @@ public class TCVisitor2: Visitor {
         }
     }
 
-    private void performParentCheck(CbClass c, int lineNumber) {
+    private void performParentCheck(CbClass c, int lineNumber) { //(DONE ?)
+        List<String> classPath = new List<String>();
+        classPath.Add(c.Name);
+        while(c.Name != "Object") {
+                c = c.Parent;
+                if (c == null) Start.SemanticError(lineNumber, "Class does not have ultimate ancestor Object");
+                if (classPath.Contains(c.Name)) Start.SemanticError(lineNumber, "Class inheritance involves cycle");
+                classPath.Add(c.Name);
+            }
+    
         /* TODO
            code to check that c's ultimate ancestor is Object.
            Be careful not to get stuck if the parent relationship

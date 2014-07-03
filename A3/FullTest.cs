@@ -1,6 +1,6 @@
 // test of everything, but without a using clause
 
-class Foo {
+class Foo : Bar{
     public const int theAnswer = 42;
     public const string hiThere = "hello";
     public const char itsAnX = 'x';
