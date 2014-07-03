@@ -472,7 +472,7 @@ public class TCVisitor2: Visitor {
         return false;
     }
     
-    private void checkTypeSyntax(AST n) { (DONE ?)
+    private void checkTypeSyntax(AST n) { //(DONE ?)
     	switch(n.Tag){
     	case NodeType.IntType:
     		break;
