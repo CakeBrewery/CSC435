@@ -118,10 +118,13 @@ public class TCVisitor1: Visitor {
             CbMethod mdef = (CbMethod)c3.FindMember(mid.Sval);
             // store return type (node 0)
             
-            if(node[0] != null && mdef != null){
-            	if(node[0].Type != null){
-            	     mdef.Type = node[0].Type;
-            	}
+            if(node[0] != null && mdef != null){        	
+            	     CbMethod cmed3 = new CbMethod("temp", false, CbType.Void, new List<CbType>());
+            	     node[0].Accept(this, cmed3);
+            	     mdef.ResultType = cmed3.ArgType[0];
+            	     node[0].Type = cmed3.ArgType[0];
+            	}else{
+            	     mdef.ResultType = CbType.Void;
             }
             // store arguments type
             mdef.ArgType = new List<CbType>();
