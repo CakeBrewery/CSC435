@@ -127,7 +127,9 @@ public class TCVisitor2: Visitor {
             if (node[0].Kind != CbKind.Variable)
                 Start.SemanticError(node.LineNumber, "target of assignment is not a variable");
             if (!isAssignmentCompatible(node[0].Type, node[1].Type))
-                Start.SemanticError(node.LineNumber, "invalid types in assignment statement");
+            	if(node[0].Type != CbType.Error && node[1].Type != CbType.Error){
+                    Start.SemanticError(node.LineNumber, "invalid types in assignment statement");
+                }
             break;
         case NodeType.If:
             node[0].Accept(this,data);
@@ -164,18 +166,54 @@ public class TCVisitor2: Visitor {
 
             /* (DONE?) TODO ... check type of method result */
             if(!isAssignmentCompatible(currentMethod.ResultType, node[0].Type)){
-                Start.SemanticError(node.LineNumber, "Invalid return type"); 
+            	if(node[0].Type != CbType.Error){
+                    Start.SemanticError(node.LineNumber, "Invalid return type"); 
+                }
             }
             break;
         case NodeType.Call:
             node[0].Accept(this,data); // method name (could be a dotted expression)
             node[1].Accept(this,data); // actual parameters
-            /* TODO ... check types */
-            
+            /* TODO ... check types  (DONE ?) */
+            //Find called method
+            CbMethod called;
+            string className1;
+            string methodName1;
+            if(node[0].Tag == NodeType.Dot){
+                string rhs1 = ((AST_leaf)node[0][1]).Sval;
+            	CbClass lhstype1 = node[0][0].Type as CbClass;
+            	CbMember mem1;
+            	lhstype1.Members.TryGetValue(rhs1,out mem1);
+            	called = (CbMethod)mem1;
+            	
+            	className1 = lhstype1.Name;
+            	methodName1 = rhs1;
+            }else{
+            	string methname1 = ((AST_leaf)(node[0])).Sval;
+            	called = (currentClass.Members[methname1]) as CbMethod;
+            	className1 = currentClass.Name;
+            	methodName1 = methname1;
+            }
+            node.Type = called.ResultType;  // FIX THIS (DONE ?)
             //Check parameters
-            List<CbType> checkList = new List<CbType>();
-            
-            node.Type = CbType.Error;  // FIX THIS
+            List<CbType> givenList = new List<CbType>();
+            for(int i = 0; i<node[1].NumChildren; i++){
+            	bool validArgument = false;
+            	if(node[1][i].Type is CbClass && called.ArgType[i] is CbClass){
+            	    if(isAncestor((CbClass)(called.ArgType[i]), (CbClass)(node[1][i].Type))){
+            	    	validArgument = true; 
+            	    }
+            	}
+            	if(node[1][i].Type == called.ArgType[i]){
+            	    validArgument = true;
+            	}
+            	if(!validArgument){
+            	    Start.SemanticError(node.LineNumber, "invalid argument of type {2} for method {0} of class {1}", methodName1, className1, node[1][i].Type);
+		    node.Type = CbType.Error;
+		    break;
+		}
+            }
+
             break;
         case NodeType.Dot:
             node[0].Accept(this,data);
@@ -309,12 +347,25 @@ public class TCVisitor2: Visitor {
         case NodeType.Index:
             node[0].Accept(this,data);
             node[1].Accept(this,data);
-
-            /* TODO ... check types */
+            
+            /* TODO ... check types (DONE ?)*/
             /* ?????? */
+	    if(node[0].Type == CbType.String){
+	    	node.Type = CbType.Char;
+	    }else if(node[0].Type is CFArray){
+	    	node.Type = ((CFArray)node[0].Type).ElementType;
+	    }else{
+	    	Start.SemanticError(node.LineNumber, "expecting an array or string value"); 
+	    	node.Type = CbType.Error;
+	    	break;
+            }
+	    
+	    if(node[1].Type != CbType.Int){
+	    	Start.SemanticError(node.LineNumber, "index value must be an integer");
+	    	node.Type = CbType.Error;
+	    }
 
 
-            node.Type = CbType.Error;  // FIX THIS
             break;
         case NodeType.Add:
         case NodeType.Sub:
@@ -326,7 +377,9 @@ public class TCVisitor2: Visitor {
 
 
             /* (DONE?) TODO ... check types */
-            if(node[0].Type == CbType.Int && node[1].Type == CbType.Int){
+            if(node[0].Type == CbType.Error || node[1].Type == CbType.Error){
+            	node.Type = CbType.Error;
+            }else if(node[0].Type == CbType.Int && node[1].Type == CbType.Int){
                 node.Type = CbType.Int; 
             }
             else if(node[0].Type == CbType.Char && node[1].Type == CbType.Char){
@@ -493,11 +546,11 @@ public class TCVisitor2: Visitor {
     		String name = ((AST_leaf)n).Sval;
     		CbClass t = ns.LookUp(name) as CbClass;
     		if(t == null){
-    			Start.SemanticError(n.LineNumber, "Invalid Cast");
+    			Start.SemanticError(n.LineNumber, "invalid Cast");
     		}
     		break;
     	default:
-    		Start.SemanticError(n.LineNumber, "Invalid Cast");     
+    		Start.SemanticError(n.LineNumber, "invalid Cast");     
     		break;
     	}
     }
@@ -529,27 +582,33 @@ public class TCVisitor2: Visitor {
     private void checkOverride(AST_nonleaf node) {
         string name = currentMethod.Name;
         CbClass checking = currentClass.Parent;
+        bool overrideFound = false;
         while(checking != null){
         	CbMember temp = checking.FindMember(name);
         	if(temp != null){ //a duplicate exists
-        		bool valid = false;
         		if(temp is CbMethod){
         			if(((CbMethod)temp).Identical(currentMethod)){
         				if(!(((CbMethod)temp).IsStatic) && !(currentMethod.IsStatic)){
-        					if(node[4].Tag == NodeType.Override){
-        						valid = true;	
+        					if(node[4].Tag == NodeType.Override){	
+        						overrideFound = true;
         					}
+        				}else{
+        					Start.SemanticError(node[0].LineNumber, "static methods cannot override or be overridden"); 
         				}
+        			}else{
+        				Start.SemanticError(node[0].LineNumber, "{0}: shares a name with a method in a parent class", name);
         			}
-        		}
-        		if(!valid){
-				Start.SemanticError(node.LineNumber, "Invalid Override"); 
+        		}else{
+        			Start.SemanticError(node[0].LineNumber, "{0}: shares a name with a constant or field in a parent class", name);
         		}
         	}
         	checking  = checking.Parent;
         }
+        if(!overrideFound && node[4].Tag == NodeType.Override){
+        	Start.SemanticError(node[0].LineNumber, "{0}: no method found in a parent class to override", name);
+        }
         // search for a member in any ancestor with same name
-        /* TODO
+        /* TODO (DONE ?)
            code to check whether any ancestor class contains a member with
            the same name. If so, it has to be a method with the identical
            signature.
