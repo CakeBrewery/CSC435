@@ -39,6 +39,15 @@ class Fibs {
         NextFib(2);
         Print(0);
     }
+	
+	public virtual void TestWhile() {
+		int a;
+		a = 0;
+		while(10 > a){
+			a++;
+			Console.Write(a);
+		}
+	}
 
     public static void Main() {
         Fibs f;
@@ -60,13 +69,15 @@ class Fibs {
 			Console.WriteLine("Y:");
 			Console.WriteLine(y);
 		}
-		/*
-		while(10>y){
+		
+		while(10 > y){
 			Console.Write(y);
 			y++;
 		}
-		*/
+		
 		Console.WriteLine(-x);
+		
+		f.TestWhile();
     }
 }
 
