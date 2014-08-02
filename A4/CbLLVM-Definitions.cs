@@ -1,7 +1,7 @@
 /* LLVM-Definitions.cs
  * 
- * Predefined functions and strings which need to be included in the generated
- * LLVM output file.
+ * Utility code to help with outputting intermediate code in the
+ * LLVM text format (as a '.ll' file).
  * 
  * Author: Nigel Horspool
  * Date: July 2014
@@ -18,7 +18,8 @@ namespace FrontEnd
     {
 
 
-    // predefined code to emit
+// predefined functions to emit
+
     static string[] predefined = {
         // in the following strings, {0} is replaced with pointer/int size (32 or 64)
         // and {1} is replaced with the alignment needed for pointers (4 or 8).
@@ -30,7 +31,7 @@ namespace FrontEnd
     	"declare i{0} @printf(i8*, ...) #1",
     	"declare i8* @gets(i8*) #1",
         "declare i{0} @atoi(i8*) #1",
-    	"declare void @llvm.memset.p0i8.i{0}(i8*, i8, i{0}, i32, i1)",
+    	"declare void @llvm.memset.p0i8.i32(i8*, i8, i32, i32, i1)",
     	"",
     	"define i8* @String.Concat(i8* %s1, i8* %s2) #0 {{",
     	"entry:",
@@ -189,11 +190,6 @@ namespace FrontEnd
             "\"e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:" +
             "32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128\"\n";
 
-    // Preamble for target triple: "x86_64-apple-macosx10.9.3"
-    const string preambleMac64 = "target datalayout = " +
-            "\"e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:" +
-            "32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128\"\n";
-
     const string epilog32 = "\nattributes #0 = { nounwind \"less-precise-fpmad\"=\"false\" " +
         "\"no-frame-pointer-elim\"=\"true\" \"no-frame-pointer-elim-non-leaf\" " +
         "\"no-infs-fp-math\"=\"false\" \"no-nans-fp-math\"=\"false\" " +
@@ -217,27 +213,18 @@ namespace FrontEnd
     public void WritePredefinedCode() {
         foreach(string s in predefined) {
             string ss = s;
-            // a few lines have to be selectively included -- they are
-            // tailored for use on the 8-byte and 4-byte platforms
             if (ss.StartsWith("#if8"))
             {
                 if (ptrAlign == 4) continue;
                 ss = ss.Substring(4);
-            } else {
+            } else
                 if (ss.StartsWith("#if4"))
                 {
                     if (ptrAlign == 8) continue;
                     ss = ss.Substring(4);
                 }
-            }
-            if (macOS)
-            {
-                ss = ss.Replace(" #0", " ");  // causes errors with MacOS!
-                ss = ss.Replace(" #1", " ");
-            }
             ll.WriteLine(ss, ptrSize, ptrAlign);
         }
     }
-
     }
 }

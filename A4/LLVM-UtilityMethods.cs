@@ -29,7 +29,7 @@ namespace FrontEnd
             return prefix + "." + nextBBNumber++;
         }
 
-        public string nextTemporary() {
+        private string nextTemporary() {
             return "%" + nextUnnamedIndex++;
         }
 
@@ -157,12 +157,6 @@ namespace FrontEnd
                 lhs.LLValue, rhs.LLValue, lhs.LLType=="i32"? 32:8 );
             return new LLVMValue("i1", rv, false);
         }
-		
-		//compare two boolean values
-		public void Write(string inputString)
-		{
-			ll.WriteLine(inputString);
-		}
 
        // compare two int or char values -- comparing two different kinds of pointer is unsupported
        // The AST node tag selects the appropriate kind of comparison
